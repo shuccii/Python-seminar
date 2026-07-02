@@ -74,3 +74,156 @@ BOSTON_CSV_PATH=/path/to/boston.csv python3 lasso_boston.py
 ## 補足
 
 `seminar6/MNICT_train.csv` はサイズが大きいため Git LFS で管理しています。リポジトリを clone する場合は、必要に応じて Git LFS を有効にしてください。
+
+## Codex CLI シェルコマンドまとめ
+
+Codex CLI で使うコマンドは、大きく次の2種類に分かれます。
+
+1. ターミナルで実行する `codex ...` コマンド
+2. Codex 起動後に入力する `/...` スラッシュコマンド
+
+公式ドキュメント:
+
+- Codex CLI reference: <https://developers.openai.com/codex/cli/reference>
+- Codex CLI slash commands: <https://developers.openai.com/codex/cli/slash-commands>
+
+### 1. ターミナルで使う `codex` コマンド
+
+| コマンド | 機能 |
+|---|---|
+| `codex` | 対話型の Codex CLI を起動する |
+| `codex "依頼内容"` | 最初のプロンプト付きで Codex CLI を起動する |
+| `codex exec "依頼内容"` / `codex e` | Codex を非対話で実行する。スクリプトや CI 向け |
+| `codex review` | 作業ツリーのコードレビューを非対話で実行する |
+| `codex login` | ChatGPT または API key などでログインする |
+| `codex logout` | 保存済みの認証情報を削除する |
+| `codex doctor` | インストール、認証、設定、実行環境を診断する |
+| `codex resume` | 過去の対話セッションを再開する |
+| `codex fork` | 過去セッションを分岐して新しい会話にする |
+| `codex archive` | セッションをアーカイブする |
+| `codex delete` | セッションを完全削除する |
+| `codex unarchive` | アーカイブしたセッションを戻す |
+| `codex apply` / `codex a` | Codex が作成した最新 diff をローカル作業ツリーに適用する |
+| `codex mcp` | MCP サーバーを管理する |
+| `codex plugin` | Codex plugin を管理する |
+| `codex mcp-server` | Codex を MCP server として stdio で起動する |
+| `codex app` | Codex デスクトップアプリを起動する |
+| `codex completion` | zsh、bash、fish、PowerShell 用の補完スクリプトを生成する |
+| `codex update` | Codex CLI を最新バージョンに更新する |
+| `codex sandbox` | Codex の sandbox 内で任意コマンドを実行する |
+| `codex features` | feature flag を確認する |
+| `codex cloud` | Codex Cloud のタスクをターミナルから扱う。実験的機能 |
+| `codex help` | ヘルプを表示する |
+
+### 2. よく使う CLI オプション
+
+| オプション | 機能 |
+|---|---|
+| `-C, --cd <DIR>` | Codex の作業ディレクトリを指定する |
+| `-m, --model <MODEL>` | 使用するモデルを指定する |
+| `-s, --sandbox <MODE>` | shell 実行時の sandbox 方針を指定する |
+| `-a, --ask-for-approval <POLICY>` | コマンド実行前に承認を求める条件を指定する |
+| `--search` | ライブ web search を有効化する |
+| `-i, --image <FILE>` | 初回プロンプトに画像を添付する |
+| `-c, --config <key=value>` | `~/.codex/config.toml` の設定を一時的に上書きする |
+| `--add-dir <DIR>` | 追加の書き込み可能ディレクトリを指定する |
+| `-p, --profile <PROFILE>` | 指定した profile config を重ねて使う |
+| `--no-alt-screen` | alternate screen を使わず、端末のスクロール履歴を残す |
+| `-h, --help` | ヘルプを表示する |
+| `-V, --version` | Codex CLI のバージョンを表示する |
+
+#### sandbox mode
+
+| 値 | 意味 |
+|---|---|
+| `read-only` | ファイルの読み取り中心。書き込みは制限される |
+| `workspace-write` | 現在の workspace 内への書き込みを許可する |
+| `danger-full-access` | sandbox なしで広いアクセスを許可する。慎重に使う |
+
+#### approval policy
+
+| 値 | 意味 |
+|---|---|
+| `untrusted` | 信頼済みコマンド以外はユーザー承認を求める |
+| `on-request` | Codex が必要に応じて承認を求める |
+| `never` | 承認を求めない。失敗はそのまま Codex に返される |
+
+### 3. 使用例
+
+```bash
+# 現在のディレクトリで Codex CLI を起動
+codex
+
+# 作業ディレクトリを指定して起動
+codex -C /Users/t-shuichi/Developer/seminar7
+
+# 最初の依頼を渡して起動
+codex "このリポジトリの構成を説明して"
+
+# モデルを指定して起動
+codex -m gpt-5.4 "このコードをレビューして"
+
+# 非対話で実行
+codex exec -C . "テストを実行して失敗原因を要約して"
+
+# 現在の変更をレビュー
+codex review
+
+# 診断
+codex doctor
+
+# 過去のセッションを再開
+codex resume
+```
+
+### 4. Codex 起動後に使う `/` スラッシュコマンド
+
+Codex CLI を起動したあと、入力欄で `/` を入力すると、使えるスラッシュコマンドの一覧を確認できます。
+
+| コマンド | 機能 |
+|---|---|
+| `/status` | 現在のモデル、権限、作業場所、トークン使用量などを表示する |
+| `/model` | 使用モデルを変更する |
+| `/permissions` | 承認や実行権限を変更する |
+| `/diff` | 現在の Git diff を表示する |
+| `/review` | 現在の変更をレビューする |
+| `/compact` | 長くなった会話を要約して文脈を圧縮する |
+| `/clear` | 画面や会話をリセットする |
+| `/new` | 新しい会話を開始する |
+| `/resume` | 保存済み会話を再開する |
+| `/fork` | 現在または過去の会話を分岐する |
+| `/plan` | Plan mode に切り替える |
+| `/goal` | 長めの作業目標を設定、確認、停止、再開する |
+| `/ide` | IDE で開いているファイルや選択範囲を文脈に含める |
+| `/mcp` | MCP ツール一覧を確認する |
+| `/plugins` | plugin を確認、管理する |
+| `/skills` | skill を選択、利用する |
+| `/apps` | connector や app を選択する |
+| `/mention` | ファイルやフォルダを会話に添付する |
+| `/copy` | 最新の Codex 出力をコピーする |
+| `/quit` / `/exit` | Codex CLI を終了する |
+
+### 5. まず覚えると便利なコマンド
+
+開発作業では、まず次のコマンドだけ覚えれば十分です。
+
+```text
+/status
+/diff
+/model
+/permissions
+/review
+/compact
+/quit
+```
+
+よくある流れ:
+
+```text
+1. codex -C <作業ディレクトリ> で起動する
+2. 作業を依頼する
+3. /diff で変更内容を確認する
+4. /review で問題がないか確認する
+5. 会話が長くなったら /compact する
+6. /quit で終了する
+```
